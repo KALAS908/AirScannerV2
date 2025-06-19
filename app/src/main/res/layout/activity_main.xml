@@ -7,10 +7,39 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <fragment
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="AirScanner"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:background="#FFF"
+        android:padding="12dp"
+        android:layout_alignParentTop="true"/>
+
+
+
+    <androidx.appcompat.widget.SearchView
+        android:id="@+id/search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/title"
+        android:layout_margin="12dp"
+        android:background="@drawable/search_bkg"
+        android:closeIcon="@drawable/baseline_clear_24"
+        android:searchIcon="@drawable/baseline_search_24"
+        app:iconifiedByDefault="false"
+        app:queryHint="Search Plane"
+        app:searchHintIcon="@null" />
+
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/id_map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:layout_below="@+id/title"
+        android:layout_marginTop="-49dp" />
 
 </RelativeLayout>
