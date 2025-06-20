@@ -53,8 +53,6 @@ class MainActivity: AppCompatActivity(), OnMapReadyCallback  {
             }
         })
 
-
-
         val mapFragment = supportFragmentManager.findFragmentById(R.id.id_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
     }
@@ -129,13 +127,15 @@ class MainActivity: AppCompatActivity(), OnMapReadyCallback  {
         }
     }
 
+
+
     private fun searchPlaneByCode(planeCode: String) {
         // Show loading toast
         Toast.makeText(this, "Searching for $planeCode...", Toast.LENGTH_SHORT).show()
 
         // Create Retrofit instance
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://localhost:7123/") // Replace with your actual API base URL
+            .baseUrl("http://10.0.2.2:5181/") // Replace with your actual API base URL
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
@@ -159,15 +159,16 @@ class MainActivity: AppCompatActivity(), OnMapReadyCallback  {
     }
 
     private fun showFlightOnMap(flight: FlightResponse) {
-        val flightPosition = LatLng(flight.latitude, flight.longitude)
+        val flightPosition = LatLng(flight.origin.latitude, flight.origin.longitude)
 
         // Add marker for the searched flight
         val flightMarker = gMap.addMarker(
             MarkerOptions()
                 .position(flightPosition)
                 .title("Flight: ${flight.callsign}")
-                .snippet("${flight.name} - ${flight.municipality}, ${flight.country}")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)) // Different color for flights
+                .snippet("${flight.callsign} - ${flight.origin.municipality}, ${flight.destination.municipality}")
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.plane_icon))
+                // Different color for flights
         )
 
         // Move camera to flight location

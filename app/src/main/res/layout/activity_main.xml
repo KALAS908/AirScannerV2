@@ -19,6 +19,13 @@
         android:padding="12dp"
         android:layout_alignParentTop="true"/>
 
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/id_map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/title"
+        android:layout_marginTop="-49dp" />
 
 
     <androidx.appcompat.widget.SearchView
@@ -33,13 +40,5 @@
         app:iconifiedByDefault="false"
         app:queryHint="Search Plane"
         app:searchHintIcon="@null" />
-
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/id_map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/title"
-        android:layout_marginTop="-49dp" />
 
 </RelativeLayout>
