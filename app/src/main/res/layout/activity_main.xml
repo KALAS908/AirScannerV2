@@ -19,15 +19,6 @@
         android:padding="12dp"
         android:layout_alignParentTop="true"/>
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/id_map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/title"
-        android:layout_marginTop="-49dp" />
-
-
     <androidx.appcompat.widget.SearchView
         android:id="@+id/search"
         android:layout_width="match_parent"
@@ -41,4 +32,72 @@
         app:queryHint="Search Plane"
         app:searchHintIcon="@null" />
 
+    <LinearLayout
+        android:id="@+id/coords_inputs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/search"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <EditText
+            android:id="@+id/edit_lamin"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="numberDecimal|numberSigned"
+            android:hint="lamin"
+            android:padding="8dp"
+            android:layout_marginEnd="4dp"/>
+
+        <EditText
+            android:id="@+id/edit_lomin"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="numberDecimal|numberSigned"
+            android:hint="lomin"
+            android:padding="8dp"
+            android:layout_marginEnd="4dp"/>
+
+        <EditText
+            android:id="@+id/edit_lamax"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="numberDecimal|numberSigned"
+            android:hint="lamax"
+            android:padding="8dp"
+            android:layout_marginEnd="4dp"/>
+
+        <EditText
+            android:id="@+id/edit_lomax"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="numberDecimal|numberSigned"
+            android:hint="lomax"
+            android:padding="8dp"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_search_flights"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Caută zboruri"
+        android:layout_below="@id/coords_inputs"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="12dp"/>
+
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/id_map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/btn_search_flights"
+        android:layout_marginTop="8dp"/>
 </RelativeLayout>

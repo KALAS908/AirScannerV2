@@ -1,6 +1,8 @@
 package com.example.airscanner;
 
 import android.os.Bundle
+import android.widget.Button
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
@@ -32,7 +34,6 @@ class MainActivity: AppCompatActivity(), OnMapReadyCallback  {
     private lateinit var searchView: SearchView;
     private lateinit var SearchItem: String;
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -52,6 +53,27 @@ class MainActivity: AppCompatActivity(), OnMapReadyCallback  {
                 return false
             }
         })
+
+
+        val btnSearchFlights = findViewById<Button>(R.id.btn_search_flights)
+        val editLamin = findViewById<EditText>(R.id.edit_lamin)
+        val editLomin = findViewById<EditText>(R.id.edit_lomin)
+        val editLamax = findViewById<EditText>(R.id.edit_lamax)
+        val editLomax = findViewById<EditText>(R.id.edit_lomax)
+
+        btnSearchFlights.setOnClickListener {
+            val lamin = editLamin.text.toString().toDoubleOrNull()
+            val lomin = editLomin.text.toString().toDoubleOrNull()
+            val lamax = editLamax.text.toString().toDoubleOrNull()
+            val lomax = editLomax.text.toString().toDoubleOrNull()
+
+            if (lamin != null && lomin != null && lamax != null && lomax != null) {
+                fetchFlights(lamin, lomin, lamax, lomax)
+            } else {
+                Toast.makeText(this, "Completează toate câmpurile corect!", Toast.LENGTH_SHORT).show()
+            }
+        }
+
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.id_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -179,6 +201,40 @@ class MainActivity: AppCompatActivity(), OnMapReadyCallback  {
 
         // Success message
         Toast.makeText(this, "Found flight: ${flight.callsign}", Toast.LENGTH_SHORT).show()
+    }
+
+
+    private fun fetchFlights(lamin: Double,lomin: Double, lamax: Double, lomax: Double) {
+        val retrofit = Retrofit.Builder()
+            .baseUrl("http://10.0.2.2:5181/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val api = retrofit.create(FlightApiService::class.java)
+        val call = api.getFlights(lamin, lomin, lamax, lomax)
+
+        call.enqueue(object : Callback<List<LiveFlight>> {
+            override fun onResponse(call: Call<List<LiveFlight>>, response: Response<List<LiveFlight>>) {
+                if (response.isSuccessful) {
+                    val flights = response.body() ?: emptyList()
+                    drawFlightsOnMap(flights)
+                }
+            }
+            override fun onFailure(call: Call<List<LiveFlight>>, t: Throwable) {
+            }
+        })
+    }
+
+    private fun drawFlightsOnMap(flights: List<LiveFlight>) {
+        flights.forEach { flight ->
+            val position = LatLng(flight.latitude, flight.longitude)
+            gMap.addMarker(
+                MarkerOptions()
+                    .position(position)
+                    .title(flight.callsign) // call sign-ul apare în InfoWindow
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.plane_icon))
+            )
+        }
     }
 
 
