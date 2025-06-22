@@ -3,6 +3,7 @@ package com.example.airscanner;
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
@@ -26,6 +27,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
 import java.io.InputStream
+import android.view.View
+import android.widget.ImageView
+import android.widget.LinearLayout
 
 class MainActivity: AppCompatActivity(), OnMapReadyCallback  {
 
@@ -33,10 +37,28 @@ class MainActivity: AppCompatActivity(), OnMapReadyCallback  {
     private val airportMarkers = mutableListOf<Marker>()
     private lateinit var searchView: SearchView;
     private lateinit var SearchItem: String;
+    private var isSearchPanelVisible = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val fragmentContainer = findViewById<FrameLayout>(R.id.fragment_container)
+        fragmentContainer.setOnClickListener {
+            fragmentContainer.visibility = View.GONE
+            supportFragmentManager.popBackStack()
+        }
+
+        val arrowToggle = findViewById<ImageView>(R.id.arrow_toggle)
+        val searchPanel = findViewById<LinearLayout>(R.id.search_panel)
+
+        arrowToggle.setOnClickListener {
+            isSearchPanelVisible = !isSearchPanelVisible
+            searchPanel.visibility = if (isSearchPanelVisible) View.VISIBLE else View.GONE
+
+            // Optional: rotate the arrow icon
+            arrowToggle.animate().rotationBy(180f).setDuration(200).start()
+        }
 
 
         searchView = findViewById(R.id.search)
@@ -77,6 +99,8 @@ class MainActivity: AppCompatActivity(), OnMapReadyCallback  {
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.id_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -130,18 +154,24 @@ class MainActivity: AppCompatActivity(), OnMapReadyCallback  {
             gMap.setOnMarkerClickListener { marker ->
                 val airport = marker.tag as? Airport
                 airport?.let {
-                    val info = """
-                        ICAO: ${it.icao}
-                        IATA: ${it.iata}
-                        Municipality: ${it.municipality}
-                        Country: ${it.country}
-                        Elevation: ${it.elevation} ft
-                    """.trimIndent()
-                    marker.snippet = info
-                    marker.showInfoWindow()
+                    val fragmentContainer = findViewById<FrameLayout>(R.id.fragment_container)
+                    if (fragmentContainer.visibility != View.VISIBLE) {
+                        fragmentContainer.visibility = View.VISIBLE
+                        fragmentContainer.translationX = fragmentContainer.width.toFloat()
+                        fragmentContainer.animate()
+                            .translationX(0f)
+                            .setDuration(300)
+                            .start()
+                    }
+
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, AirportDetailsFragment.newInstance(airport))
+                        .addToBackStack(null)
+                        .commit()
                 }
                 true
             }
+
 
         } catch (e: IOException) {
             e.printStackTrace()
@@ -157,7 +187,7 @@ class MainActivity: AppCompatActivity(), OnMapReadyCallback  {
 
         // Create Retrofit instance
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:5181/") // Replace with your actual API base URL
+            .baseUrl("http://192.168.1.134:5181/") // Replace with your actual API base URL
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
@@ -206,7 +236,7 @@ class MainActivity: AppCompatActivity(), OnMapReadyCallback  {
 
     private fun fetchFlights(lamin: Double,lomin: Double, lamax: Double, lomax: Double) {
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:5181/")
+            .baseUrl("http://192.168.1.134:5181/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
@@ -234,6 +264,22 @@ class MainActivity: AppCompatActivity(), OnMapReadyCallback  {
                     .title(flight.callsign) // call sign-ul apare în InfoWindow
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.plane_icon))
             )
+        }
+    }
+
+    override fun onBackPressed() {
+        val fragmentContainer = findViewById<FrameLayout>(R.id.fragment_container)
+        if (fragmentContainer.visibility == View.VISIBLE) {
+            fragmentContainer.animate()
+                .translationX(fragmentContainer.width.toFloat())
+                .withEndAction {
+                    fragmentContainer.visibility = View.GONE
+                    supportFragmentManager.popBackStack()
+                    fragmentContainer.translationX = 0f
+                }
+                .start()
+        } else {
+            super.onBackPressed()
         }
     }
 
