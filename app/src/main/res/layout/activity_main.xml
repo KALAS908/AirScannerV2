@@ -17,87 +17,126 @@
         android:gravity="center"
         android:background="#FFF"
         android:padding="12dp"
-        android:layout_alignParentTop="true"/>
+        android:layout_alignParentTop="true" />
 
-    <androidx.appcompat.widget.SearchView
-        android:id="@+id/search"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+    <!-- Toggle Arrow Button -->
+    <ImageView
+        android:id="@+id/arrow_toggle"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_below="@id/title"
         android:layout_margin="12dp"
-        android:background="@drawable/search_bkg"
-        android:closeIcon="@drawable/baseline_clear_24"
-        android:searchIcon="@drawable/baseline_search_24"
-        app:iconifiedByDefault="false"
-        app:queryHint="Search Plane"
-        app:searchHintIcon="@null" />
+        android:padding="12dp"
+        android:src="@drawable/left_arrow"
+        android:contentDescription="Toggle Search Panel"
+        android:layout_alignParentEnd="true"
+        android:clickable="true"
+        android:focusable="true" />
 
+    <!-- Search + Coords Panel -->
     <LinearLayout
-        android:id="@+id/coords_inputs"
+        android:id="@+id/search_panel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/search"
-        android:layout_marginLeft="12dp"
-        android:layout_marginRight="12dp"
-        android:layout_marginTop="8dp"
-        android:orientation="horizontal"
-        android:gravity="center">
+        android:layout_below="@id/arrow_toggle"
+        android:orientation="vertical"
+        android:visibility="gone">
 
-        <EditText
-            android:id="@+id/edit_lamin"
-            android:layout_width="0dp"
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/search"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:inputType="numberDecimal|numberSigned"
-            android:hint="lamin"
-            android:padding="8dp"
-            android:layout_marginEnd="4dp"/>
+            android:layout_margin="12dp"
+            android:background="@drawable/search_bkg"
+            android:closeIcon="@drawable/baseline_clear_24"
+            android:searchIcon="@drawable/baseline_search_24"
+            app:iconifiedByDefault="false"
+            app:queryHint="Search Plane"
+            app:searchHintIcon="@null" />
 
-        <EditText
-            android:id="@+id/edit_lomin"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:id="@+id/coords_inputs"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:inputType="numberDecimal|numberSigned"
-            android:hint="lomin"
-            android:padding="8dp"
-            android:layout_marginEnd="4dp"/>
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:gravity="center">
 
-        <EditText
-            android:id="@+id/edit_lamax"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:inputType="numberDecimal|numberSigned"
-            android:hint="lamax"
-            android:padding="8dp"
-            android:layout_marginEnd="4dp"/>
+            <EditText
+                android:id="@+id/edit_lamin"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:inputType="numberDecimal|numberSigned"
+                android:hint="lamin"
+                android:padding="8dp"
+                android:layout_marginEnd="4dp" />
 
-        <EditText
-            android:id="@+id/edit_lomax"
-            android:layout_width="0dp"
+            <EditText
+                android:id="@+id/edit_lomin"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:inputType="numberDecimal|numberSigned"
+                android:hint="lomin"
+                android:padding="8dp"
+                android:layout_marginEnd="4dp" />
+
+            <EditText
+                android:id="@+id/edit_lamax"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:inputType="numberDecimal|numberSigned"
+                android:hint="lamax"
+                android:padding="8dp"
+                android:layout_marginEnd="4dp" />
+
+            <EditText
+                android:id="@+id/edit_lomax"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:inputType="numberDecimal|numberSigned"
+                android:hint="lomax"
+                android:padding="8dp" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_search_flights"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:inputType="numberDecimal|numberSigned"
-            android:hint="lomax"
-            android:padding="8dp"/>
+            android:text="Caută zboruri"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="12dp" />
     </LinearLayout>
 
-    <Button
-        android:id="@+id/btn_search_flights"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Caută zboruri"
-        android:layout_below="@id/coords_inputs"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="12dp"/>
-
-
+    <!-- Google Map Fragment -->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/id_map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/btn_search_flights"
-        android:layout_marginTop="8dp"/>
+        android:layout_below="@id/search_panel"
+        android:layout_marginTop="8dp" />
+
+    <!-- Right-side Airport Detail Panel -->
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:background="#FFFFFF"
+        android:elevation="12dp"
+        android:visibility="gone"
+        android:translationX="280dp" />
 </RelativeLayout>
