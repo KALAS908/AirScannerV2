@@ -187,7 +187,7 @@ class MainActivity: AppCompatActivity(), OnMapReadyCallback  {
 
         // Create Retrofit instance
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://192.168.1.134:5181/") // Replace with your actual API base URL
+            .baseUrl("https://airscanner-h5d0bhehefe9h3cu.northeurope-01.azurewebsites.net/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
@@ -236,7 +236,7 @@ class MainActivity: AppCompatActivity(), OnMapReadyCallback  {
 
     private fun fetchFlights(lamin: Double,lomin: Double, lamax: Double, lomax: Double) {
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://192.168.1.134:5181/")
+            .baseUrl("https://airscanner-h5d0bhehefe9h3cu.northeurope-01.azurewebsites.net/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
