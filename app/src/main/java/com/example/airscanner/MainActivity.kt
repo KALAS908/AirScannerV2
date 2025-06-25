@@ -1,204 +1,151 @@
-package com.example.airscanner;
+package com.example.airscanner
 
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.FrameLayout
-import android.widget.Toast
+import android.os.Handler
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
-import com.example.airscanner.R
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
-import org.apache.poi.ss.usermodel.Row
-import org.apache.poi.ss.usermodel.Sheet
-import org.apache.poi.ss.usermodel.Workbook
+import com.google.android.gms.maps.*
+import com.google.android.gms.maps.model.*
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
+import retrofit2.*
 import retrofit2.converter.gson.GsonConverterFactory
-import java.io.IOException
 import java.io.InputStream
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.fragment.app.Fragment
 
-class MainActivity: AppCompatActivity(), OnMapReadyCallback  {
+class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var gMap: GoogleMap
+    private val flightMarkers = mutableListOf<Marker>()
     private val airportMarkers = mutableListOf<Marker>()
-    private lateinit var searchView: SearchView;
-    private lateinit var SearchItem: String;
-    private var isSearchPanelVisible = true
+    private lateinit var handler: Handler
+    private lateinit var updateRunnable: Runnable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         val fragmentContainer = findViewById<FrameLayout>(R.id.fragment_container)
-        fragmentContainer.setOnClickListener {
+        fragmentContainer?.setOnClickListener {
             fragmentContainer.visibility = View.GONE
             supportFragmentManager.popBackStack()
         }
 
-        val arrowToggle = findViewById<ImageView>(R.id.arrow_toggle)
-        val searchPanel = findViewById<LinearLayout>(R.id.search_panel)
+        val searchPanel = findViewById<LinearLayout>(R.id.search_mode_panel)
+        val callsignSearch = findViewById<SearchView>(R.id.search_callsign)
 
-        arrowToggle.setOnClickListener {
-            isSearchPanelVisible = !isSearchPanelVisible
-            searchPanel.visibility = if (isSearchPanelVisible) View.VISIBLE else View.GONE
-
-            // Optional: rotate the arrow icon
-            arrowToggle.animate().rotationBy(180f).setDuration(200).start()
+        findViewById<ImageView>(R.id.icon_search).setOnClickListener {
+            searchPanel.visibility = View.VISIBLE
         }
 
+        val closeSearchBtn = findViewById<ImageView>(R.id.btn_close_search)
+        closeSearchBtn.setOnClickListener {
+            searchPanel.visibility = View.GONE
+        }
 
-        searchView = findViewById(R.id.search)
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+        callsignSearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                query?.let { planeCode ->
-                    searchPlaneByCode(planeCode.trim())
+                query?.let {
+                    searchPlaneByCode(it.trim())
                 }
                 return true
             }
 
-            override fun onQueryTextChange(newText: String?): Boolean {
-                // Optional: implement real-time search as user types
-                return false
-            }
+            override fun onQueryTextChange(newText: String?) = false
         })
-
-
-        val btnSearchFlights = findViewById<Button>(R.id.btn_search_flights)
-        val editLamin = findViewById<EditText>(R.id.edit_lamin)
-        val editLomin = findViewById<EditText>(R.id.edit_lomin)
-        val editLamax = findViewById<EditText>(R.id.edit_lamax)
-        val editLomax = findViewById<EditText>(R.id.edit_lomax)
-
-        btnSearchFlights.setOnClickListener {
-            val lamin = editLamin.text.toString().toDoubleOrNull()
-            val lomin = editLomin.text.toString().toDoubleOrNull()
-            val lamax = editLamax.text.toString().toDoubleOrNull()
-            val lomax = editLomax.text.toString().toDoubleOrNull()
-
-            if (lamin != null && lomin != null && lamax != null && lomax != null) {
-                fetchFlights(lamin, lomin, lamax, lomax)
-            } else {
-                Toast.makeText(this, "Completează toate câmpurile corect!", Toast.LENGTH_SHORT).show()
-            }
-        }
-
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.id_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
-
-
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
         gMap = googleMap
 
+        loadAirports()
+
+        gMap.setOnCameraIdleListener {
+            val zoom = gMap.cameraPosition.zoom
+            val showMarkers = zoom > 6
+            airportMarkers.forEach { it.isVisible = showMarkers }
+        }
+
+        gMap.setOnMarkerClickListener { marker ->
+            when (val tag = marker.tag) {
+                is Airport -> {
+                    showFragment(AirportDetailsFragment.newInstance(tag))
+                }
+                is String -> searchPlaneByCode(tag)
+            }
+            true
+        }
+
+        startAutoUpdate()
+    }
+
+    private fun loadAirports() {
         try {
             val inputStream: InputStream = assets.open("airport_coordinates.xlsx")
-
-            val workbook: Workbook = XSSFWorkbook(inputStream)
-            val sheet: Sheet = workbook.getSheetAt(0)
+            val workbook = XSSFWorkbook(inputStream)
+            val sheet = workbook.getSheetAt(0)
 
             for (i in 1..sheet.lastRowNum) {
-                val row: Row = sheet.getRow(i) ?: continue
+                val row = sheet.getRow(i) ?: continue
                 if (row.getCell(0) == null) continue
 
                 val name = row.getCell(0).stringCellValue
                 val latitude = row.getCell(1).numericCellValue
                 val longitude = row.getCell(2).numericCellValue
-                val elevation = row.getCell(3)?.toString() ?: ""
-                val municipality = row.getCell(4)?.toString() ?: ""
-                val country = row.getCell(5)?.toString() ?: ""
-                val icao = row.getCell(6)?.toString() ?: ""
-                val iata = row.getCell(7)?.toString() ?: ""
-
-                val airport =
-                    Airport(name, latitude, longitude, elevation, municipality, country, icao, iata)
+                val airport = Airport(
+                    name, latitude, longitude,
+                    row.getCell(3)?.toString() ?: "",
+                    row.getCell(4)?.toString() ?: "",
+                    row.getCell(5)?.toString() ?: "",
+                    row.getCell(6)?.toString() ?: "",
+                    row.getCell(7)?.toString() ?: ""
+                )
 
                 val marker = gMap.addMarker(
                     MarkerOptions()
                         .position(LatLng(latitude, longitude))
                         .title(name)
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.airport_marker))
-                        .visible(false) // initially invisible
+                        .visible(false)
                 )
-
-                marker?.let {
-                    it.tag = airport
-                    airportMarkers.add(it)
-                }
+                marker?.tag = airport
+                airportMarkers.add(marker!!)
             }
-
-            gMap.setOnCameraIdleListener {
-                val zoom = gMap.cameraPosition.zoom
-                val showMarkers = zoom > 6
-
-                airportMarkers.forEach { marker ->
-                    marker.isVisible = showMarkers
-                }
-            }
-
-            gMap.setOnMarkerClickListener { marker ->
-                val airport = marker.tag as? Airport
-                airport?.let {
-                    val fragmentContainer = findViewById<FrameLayout>(R.id.fragment_container)
-                    if (fragmentContainer.visibility != View.VISIBLE) {
-                        fragmentContainer.visibility = View.VISIBLE
-                        fragmentContainer.translationX = fragmentContainer.width.toFloat()
-                        fragmentContainer.animate()
-                            .translationX(0f)
-                            .setDuration(300)
-                            .start()
-                    }
-
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragment_container, AirportDetailsFragment.newInstance(airport))
-                        .addToBackStack(null)
-                        .commit()
-                }
-                true
-            }
-
-
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             e.printStackTrace()
             Toast.makeText(this, "Eroare la citirea fișierului", Toast.LENGTH_LONG).show()
         }
     }
 
-
+    private fun startAutoUpdate() {
+        handler = Handler(mainLooper)
+        updateRunnable = object : Runnable {
+            override fun run() {
+                fetchFlights(-90.0, -180.0, 90.0, 180.0) // toate zborurile
+                handler.postDelayed(this, 30_000) // 30 secunde
+            }
+        }
+        handler.post(updateRunnable)
+    }
 
     private fun searchPlaneByCode(planeCode: String) {
-        // Show loading toast
-        Toast.makeText(this, "Searching for $planeCode...", Toast.LENGTH_SHORT).show()
-
-        // Create Retrofit instance
         val retrofit = Retrofit.Builder()
             .baseUrl("https://airscanner-h5d0bhehefe9h3cu.northeurope-01.azurewebsites.net/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
         val apiService = retrofit.create(FlightApiService::class.java)
-        val call = apiService.getFlightByCode(planeCode)
-
-        call.enqueue(object : Callback<FlightResponse> {
+        apiService.getFlightByCode(planeCode).enqueue(object : Callback<FlightResponse> {
             override fun onResponse(call: Call<FlightResponse>, response: Response<FlightResponse>) {
                 if (response.isSuccessful && response.body() != null) {
-                    val flightData = response.body()!!
-                    showFlightOnMap(flightData)
+                    val flight = response.body()!!
+                    showFragment(FlightDetailsFragment.newInstance(flight))
                 } else {
                     Toast.makeText(this@MainActivity, "Flight not found: $planeCode", Toast.LENGTH_LONG).show()
                 }
@@ -210,61 +157,54 @@ class MainActivity: AppCompatActivity(), OnMapReadyCallback  {
         })
     }
 
-    private fun showFlightOnMap(flight: FlightResponse) {
-        val flightPosition = LatLng(flight.origin.latitude, flight.origin.longitude)
-
-        // Add marker for the searched flight
-        val flightMarker = gMap.addMarker(
-            MarkerOptions()
-                .position(flightPosition)
-                .title("Flight: ${flight.callsign}")
-                .snippet("${flight.callsign} - ${flight.origin.municipality}, ${flight.destination.municipality}")
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.plane_icon))
-                // Different color for flights
-        )
-
-        // Move camera to flight location
-        gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(flightPosition, 10f))
-
-        // Show info window
-        flightMarker?.showInfoWindow()
-
-        // Success message
-        Toast.makeText(this, "Found flight: ${flight.callsign}", Toast.LENGTH_SHORT).show()
-    }
-
-
-    private fun fetchFlights(lamin: Double,lomin: Double, lamax: Double, lomax: Double) {
+    private fun fetchFlights(lamin: Double, lomin: Double, lamax: Double, lomax: Double) {
         val retrofit = Retrofit.Builder()
             .baseUrl("https://airscanner-h5d0bhehefe9h3cu.northeurope-01.azurewebsites.net/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        val api = retrofit.create(FlightApiService::class.java)
-        val call = api.getFlights(lamin, lomin, lamax, lomax)
-
-        call.enqueue(object : Callback<List<LiveFlight>> {
-            override fun onResponse(call: Call<List<LiveFlight>>, response: Response<List<LiveFlight>>) {
-                if (response.isSuccessful) {
-                    val flights = response.body() ?: emptyList()
-                    drawFlightsOnMap(flights)
+        retrofit.create(FlightApiService::class.java)
+            .getFlights(lamin, lomin, lamax, lomax)
+            .enqueue(object : Callback<List<LiveFlight>> {
+                override fun onResponse(call: Call<List<LiveFlight>>, response: Response<List<LiveFlight>>) {
+                    response.body()?.let {
+                        drawFlightsOnMap(it)
+                    }
                 }
-            }
-            override fun onFailure(call: Call<List<LiveFlight>>, t: Throwable) {
-            }
-        })
+
+                override fun onFailure(call: Call<List<LiveFlight>>, t: Throwable) {}
+            })
     }
 
     private fun drawFlightsOnMap(flights: List<LiveFlight>) {
+        flightMarkers.forEach { it.remove() }
+        flightMarkers.clear()
+
         flights.forEach { flight ->
             val position = LatLng(flight.latitude, flight.longitude)
-            gMap.addMarker(
+            val marker = gMap.addMarker(
                 MarkerOptions()
                     .position(position)
-                    .title(flight.callsign) // call sign-ul apare în InfoWindow
+                    .title(flight.callsign)
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.plane_icon))
             )
+            marker?.tag = flight.callsign
+            marker?.let { flightMarkers.add(it) }
         }
+    }
+
+    private fun showFragment(fragment: Fragment) {
+        val fragmentContainer = findViewById<FrameLayout>(R.id.fragment_container)
+        if (fragmentContainer.visibility != View.VISIBLE) {
+            fragmentContainer.visibility = View.VISIBLE
+            fragmentContainer.translationX = fragmentContainer.width.toFloat()
+            fragmentContainer.animate().translationX(0f).setDuration(300).start()
+        }
+
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     override fun onBackPressed() {
@@ -283,5 +223,9 @@ class MainActivity: AppCompatActivity(), OnMapReadyCallback  {
         }
     }
 
-
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacks(updateRunnable)
+    }
 }
+
