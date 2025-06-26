@@ -35,15 +35,6 @@
             android:padding="8dp"
             android:layout_marginBottom="8dp"/>
 
-        <ImageView
-            android:id="@+id/icon_profile"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/profile_icon"
-            android:contentDescription="Profile"
-            android:background="@drawable/round_icon_bkg"
-            android:padding="8dp"
-            android:layout_marginBottom="8dp"/>
     </LinearLayout>
 
     <LinearLayout

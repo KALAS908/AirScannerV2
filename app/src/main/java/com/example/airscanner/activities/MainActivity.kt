@@ -162,8 +162,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun searchPlaneByCode(planeCode: String) {
         val retrofit = Retrofit.Builder()
-            //.baseUrl("https://airscanner-h5d0bhehefe9h3cu.northeurope-01.azurewebsites.net/")
-            .baseUrl("http://10.0.2.2:5181/")
+            .baseUrl("https://airscanner-h5d0bhehefe9h3cu.northeurope-01.azurewebsites.net/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
@@ -186,8 +185,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun fetchFlights(lamin: Double, lomin: Double, lamax: Double, lomax: Double) {
         val retrofit = Retrofit.Builder()
-            //.baseUrl("https://airscanner-h5d0bhehefe9h3cu.northeurope-01.azurewebsites.net/")
-            .baseUrl("http://10.0.2.2:5181/")
+            .baseUrl("https://airscanner-h5d0bhehefe9h3cu.northeurope-01.azurewebsites.net/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
@@ -210,11 +208,16 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         flights.forEach { flight ->
             val position = LatLng(flight.latitude, flight.longitude)
+            val rotation = ((flight.trueTrack?.toFloat() ?: 0f) - 45f + 360f) % 360f
+
             val marker = gMap.addMarker(
                 MarkerOptions()
                     .position(position)
                     .title(flight.callsign)
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.plane_icon))
+                    .rotation(rotation)
+                    .anchor(0.5f, 0.5f)
+                    .flat(true)
             )
             marker?.tag = flight.callsign
             marker?.let { flightMarkers.add(it) }
