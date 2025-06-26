@@ -1,5 +1,6 @@
 package com.example.airscanner.activities
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.widget.*
@@ -21,7 +22,10 @@ import com.example.airscanner.fragments.FlightDetailsFragment
 import com.example.airscanner.services.dto.FlightResponse
 import com.example.airscanner.models.LiveFlight
 import com.example.airscanner.R
+import com.example.airscanner.activities.auth.LoginActivity
+import com.example.airscanner.activities.auth.RegisterActivity
 import com.example.airscanner.fragments.AirportDetailsFragment
+import com.example.airscanner.models.TokenManager
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -44,6 +48,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         val searchPanel = findViewById<LinearLayout>(R.id.search_mode_panel)
         val callsignSearch = findViewById<SearchView>(R.id.search_callsign)
+        val logout = findViewById<ImageView>(R.id.btn_logout);
+
+
+        logout.setOnClickListener {
+
+            TokenManager.clearTokens()
+
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
 
         findViewById<ImageView>(R.id.icon_search).setOnClickListener {
             searchPanel.visibility = View.VISIBLE
@@ -67,6 +82,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.id_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+
+
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -144,7 +162,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun searchPlaneByCode(planeCode: String) {
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://airscanner-h5d0bhehefe9h3cu.northeurope-01.azurewebsites.net/")
+            //.baseUrl("https://airscanner-h5d0bhehefe9h3cu.northeurope-01.azurewebsites.net/")
+            .baseUrl("http://10.0.2.2:5181/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
@@ -167,7 +186,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun fetchFlights(lamin: Double, lomin: Double, lamax: Double, lomax: Double) {
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://airscanner-h5d0bhehefe9h3cu.northeurope-01.azurewebsites.net/")
+            //.baseUrl("https://airscanner-h5d0bhehefe9h3cu.northeurope-01.azurewebsites.net/")
+            .baseUrl("http://10.0.2.2:5181/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 

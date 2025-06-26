@@ -1,5 +1,6 @@
-package com.example.airscanner
+package com.example.airscanner.services
 
+import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
@@ -9,8 +10,8 @@ data class AuthResponse(val tokenType: String,val accessToken: String,val expire
 
 interface AuthService {
     @POST("register")
-    suspend fun register(@Body request: AuthRequest): Response<Void>
+    fun register(@Body request: AuthRequest): Call<Void>
 
     @POST("login")
-    suspend fun login(@Body request: AuthRequest): Response<AuthResponse>
+    fun login(@Body request: AuthRequest): Call<AuthResponse>
 }
