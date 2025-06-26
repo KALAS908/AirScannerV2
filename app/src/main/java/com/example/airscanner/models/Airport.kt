@@ -1,5 +1,9 @@
-package com.example.airscanner;
+package com.example.airscanner.models;
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class Airport(
     val name: String,
     val latitude: Double,
@@ -9,4 +13,4 @@ data class Airport(
     val country: String,
     val icao: String,
     val iata: String
-)
+) : Parcelable

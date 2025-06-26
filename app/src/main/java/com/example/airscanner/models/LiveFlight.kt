@@ -1,4 +1,4 @@
-package com.example.airscanner
+package com.example.airscanner.models
 
 data class LiveFlight (
     val icao24: String?,

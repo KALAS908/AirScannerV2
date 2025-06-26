@@ -1,103 +1,101 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
-
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="AirScanner"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:background="#FFF"
-        android:padding="12dp"
-        android:layout_alignParentTop="true"/>
-
-    <androidx.appcompat.widget.SearchView
-        android:id="@+id/search"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/title"
-        android:layout_margin="12dp"
-        android:background="@drawable/search_bkg"
-        android:closeIcon="@drawable/baseline_clear_24"
-        android:searchIcon="@drawable/baseline_search_24"
-        app:iconifiedByDefault="false"
-        app:queryHint="Search Plane"
-        app:searchHintIcon="@null" />
-
-    <LinearLayout
-        android:id="@+id/coords_inputs"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/search"
-        android:layout_marginLeft="12dp"
-        android:layout_marginRight="12dp"
-        android:layout_marginTop="8dp"
-        android:orientation="horizontal"
-        android:gravity="center">
-
-        <EditText
-            android:id="@+id/edit_lamin"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:inputType="numberDecimal|numberSigned"
-            android:hint="lamin"
-            android:padding="8dp"
-            android:layout_marginEnd="4dp"/>
-
-        <EditText
-            android:id="@+id/edit_lomin"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:inputType="numberDecimal|numberSigned"
-            android:hint="lomin"
-            android:padding="8dp"
-            android:layout_marginEnd="4dp"/>
-
-        <EditText
-            android:id="@+id/edit_lamax"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:inputType="numberDecimal|numberSigned"
-            android:hint="lamax"
-            android:padding="8dp"
-            android:layout_marginEnd="4dp"/>
-
-        <EditText
-            android:id="@+id/edit_lomax"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:inputType="numberDecimal|numberSigned"
-            android:hint="lomax"
-            android:padding="8dp"/>
-    </LinearLayout>
-
-    <Button
-        android:id="@+id/btn_search_flights"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Caută zboruri"
-        android:layout_below="@id/coords_inputs"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="12dp"/>
-
-
+    android:background="#FFFFFF">
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/id_map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Iconuri Verticale -->
+    <LinearLayout
+        android:id="@+id/left_icon_panel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="12dp"
+        android:layout_gravity="start|top"
+        android:elevation="4dp">
+        <ImageView
+            android:id="@+id/icon_search"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/search_icon"
+            android:contentDescription="Search"
+            android:background="@drawable/round_icon_bkg"
+            android:padding="8dp"
+            android:layout_marginBottom="8dp"/>
+
+        <ImageView
+            android:id="@+id/icon_profile"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/profile_icon"
+            android:contentDescription="Profile"
+            android:background="@drawable/round_icon_bkg"
+            android:padding="8dp"
+            android:layout_marginBottom="8dp"/>
+
+        <ImageView
+            android:id="@+id/icon_favorite"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/favorite_icon"
+            android:contentDescription="Favorite"
+            android:background="@drawable/round_icon_bkg"
+            android:padding="8dp"/>
+    </LinearLayout>
+
+    <!-- Panou de căutare -->
+    <LinearLayout
+        android:id="@+id/search_mode_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_gravity="top"
+        android:background="@drawable/search_panel_bkg"
+        android:visibility="gone"
+        android:elevation="4dp">
+
+        <!-- Buton închidere -->
+        <ImageView
+            android:id="@+id/btn_close_search"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="end"
+            android:src="@drawable/ic_close"
+            android:contentDescription="Close"
+            android:padding="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
+
+        <!-- SearchView -->
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/search_callsign"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:queryHint="type callsign..."
+            android:background="@drawable/input_bkg"
+            android:visibility="visible" />
+
+        <Button
+            android:id="@+id/btn_search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Search"
+            android:layout_marginTop="12dp"
+            android:backgroundTint="#7C4DFF"
+            android:textColor="#FFF"/>
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="320dp"
         android:layout_height="match_parent"
-        android:layout_below="@id/btn_search_flights"
-        android:layout_marginTop="8dp"/>
-</RelativeLayout>
+        android:layout_gravity="end"
+        android:visibility="gone"
+        android:background="#FFFFFFFF"
+        android:elevation="6dp" />
+</FrameLayout>
