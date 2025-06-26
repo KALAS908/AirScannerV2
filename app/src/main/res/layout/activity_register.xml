@@ -42,6 +42,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Go to Login" />
+
+        <TextView
+            android:id="@+id/tv_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#D32F2F"
+            android:textSize="14sp"
+            android:paddingTop="16dp"
+            android:text=""
+            />
     </LinearLayout>
 
 
