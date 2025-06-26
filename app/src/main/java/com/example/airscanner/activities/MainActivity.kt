@@ -108,7 +108,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             true
         }
 
-        startAutoUpdate()
+         startAutoUpdate()
     }
 
     private fun loadAirports() {
@@ -153,8 +153,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         handler = Handler(mainLooper)
         updateRunnable = object : Runnable {
             override fun run() {
-                fetchFlights(-90.0, -180.0, 90.0, 180.0) // toate zborurile
-                handler.postDelayed(this, 30_000) // 30 secunde
+                fetchFlights(-90.0, -180.0, 90.0, 180.0)
+                handler.postDelayed(this, 30_000)
             }
         }
         handler.post(updateRunnable)

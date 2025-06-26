@@ -1,65 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="top|end"
+    android:layout_margin="16dp"
+    android:background="@drawable/search_panel_bkg"
+    android:elevation="6dp">
 
     <LinearLayout
-        android:layout_width="300dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:background="#FFFFFF"
-        tools:ignore="MissingConstraints">
+        android:padding="16dp">
 
-        <Button
+        <ImageView
             android:id="@+id/btn_close"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="X"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_gravity="end"
+            android:src="@drawable/close_container"
+            android:contentDescription="Închide"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:textSize="18sp"/>
+            android:padding="4dp" />
 
         <TextView
             android:id="@+id/text_callsign"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Callsign: WZZ9P"
+            android:text="Callsign: "
             android:textStyle="bold"
-            android:textSize="18sp"/>
+            android:textSize="18sp"
+            android:layout_marginTop="8dp" />
 
         <TextView
             android:id="@+id/text_airline"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Airline: Wizz Air"/>
+            android:text="Airline: "
+            android:layout_marginTop="4dp" />
 
         <TextView
             android:id="@+id/text_origin"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="From: Tenerife Sur Airport (Tenerife)"/>
+            android:text="From: "
+            android:layout_marginTop="4dp" />
 
         <TextView
             android:id="@+id/text_destination"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="To: Warsaw Chopin Airport (Warsaw)"/>
+            android:text="To: "
+            android:layout_marginTop="4dp" />
 
         <TextView
             android:id="@+id/text_origin_coords"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Origin Coordinates: 28.0445, -16.5725"/>
+            android:text="Origin Coordinates: "
+            android:layout_marginTop="4dp" />
 
         <TextView
             android:id="@+id/text_dest_coords"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Destination Coordinates: 52.1657, 20.9671"/>
-
+            android:text="Destination Coordinates: "
+            android:layout_marginTop="4dp" />
     </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

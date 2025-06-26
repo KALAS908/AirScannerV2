@@ -8,7 +8,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- Iconuri Verticale -->
     <LinearLayout
         android:id="@+id/left_icon_panel"
         android:layout_width="wrap_content"
@@ -45,18 +44,8 @@
             android:background="@drawable/round_icon_bkg"
             android:padding="8dp"
             android:layout_marginBottom="8dp"/>
-
-        <ImageView
-            android:id="@+id/icon_favorite"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/favorite_icon"
-            android:contentDescription="Favorite"
-            android:background="@drawable/round_icon_bkg"
-            android:padding="8dp"/>
     </LinearLayout>
 
-    <!-- Panou de căutare -->
     <LinearLayout
         android:id="@+id/search_mode_panel"
         android:layout_width="match_parent"
@@ -68,8 +57,6 @@
         android:visibility="gone"
         android:elevation="4dp">
 
-
-        <!-- Buton închidere -->
         <ImageView
             android:id="@+id/btn_close_search"
             android:layout_width="24dp"
@@ -80,7 +67,6 @@
             android:padding="4dp"
             android:background="?attr/selectableItemBackgroundBorderless"/>
 
-        <!-- SearchView -->
         <androidx.appcompat.widget.SearchView
             android:id="@+id/search_callsign"
             android:layout_width="match_parent"
@@ -102,10 +88,12 @@
 
     <FrameLayout
         android:id="@+id/fragment_container"
-        android:layout_width="320dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="end"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
         android:visibility="gone"
-        android:background="#FFFFFFFF"
-        android:elevation="6dp" />
+        android:elevation="6dp"
+        android:background="@android:color/transparent" />
 </FrameLayout>

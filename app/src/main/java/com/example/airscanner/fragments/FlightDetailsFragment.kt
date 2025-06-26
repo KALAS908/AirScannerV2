@@ -5,8 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.example.airscanner.services.dto.FlightResponse
@@ -49,7 +49,7 @@ class FlightDetailsFragment : Fragment() {
         view.findViewById<TextView>(R.id.text_dest_coords).text =
             "Destination Coordinates: ${destination.latitude}, ${destination.longitude}"
 
-        view.findViewById<Button>(R.id.btn_close).setOnClickListener {
+        view.findViewById<ImageView>(R.id.btn_close).setOnClickListener {
             activity?.let { act ->
                 val fragmentContainer = act.findViewById<FrameLayout>(R.id.fragment_container)
                 fragmentContainer.animate()

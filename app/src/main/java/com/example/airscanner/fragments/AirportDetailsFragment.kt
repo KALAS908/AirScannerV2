@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.example.airscanner.models.Airport
@@ -40,7 +41,7 @@ class AirportDetailsFragment : Fragment() {
         view.findViewById<TextView>(R.id.text_iata).text = "IATA: ${airport.iata}"
         view.findViewById<TextView>(R.id.text_elevation).text = "Altitudine: ${airport.elevation} ft"
 
-        view.findViewById<Button>(R.id.btn_close).setOnClickListener {
+        view.findViewById<ImageView>(R.id.btn_close).setOnClickListener {
             activity?.let { act ->
                 val fragmentContainer = act.findViewById<FrameLayout>(R.id.fragment_container)
                 fragmentContainer.animate()
