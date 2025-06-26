@@ -1,4 +1,4 @@
-package com.example.airscanner;
+package com.example.airscanner.models;
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

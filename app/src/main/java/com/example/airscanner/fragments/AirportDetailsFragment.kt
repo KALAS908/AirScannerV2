@@ -1,3 +1,5 @@
+package com.example.airscanner.fragments
+
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,7 +9,7 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.example.airscanner.Airport
+import com.example.airscanner.models.Airport
 import com.example.airscanner.R
 
 class AirportDetailsFragment : Fragment() {

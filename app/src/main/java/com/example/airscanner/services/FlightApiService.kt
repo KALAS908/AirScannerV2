@@ -1,5 +1,7 @@
-package com.example.airscanner
+package com.example.airscanner.services
 
+import com.example.airscanner.services.dto.FlightResponse
+import com.example.airscanner.models.LiveFlight
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Path

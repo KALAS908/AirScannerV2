@@ -1,4 +1,4 @@
-package com.example.airscanner
+package com.example.airscanner.fragments
 
 import android.os.Build
 import android.os.Bundle
@@ -9,6 +9,8 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.example.airscanner.services.dto.FlightResponse
+import com.example.airscanner.R
 
 class FlightDetailsFragment : Fragment() {
 

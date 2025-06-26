@@ -1,6 +1,8 @@
-package com.example.airscanner
+package com.example.airscanner.services.dto
 
 import android.os.Parcelable
+import com.example.airscanner.models.Destination
+import com.example.airscanner.models.Origin
 import kotlinx.parcelize.Parcelize
 
 @Parcelize

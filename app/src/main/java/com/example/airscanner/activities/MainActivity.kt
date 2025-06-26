@@ -1,4 +1,4 @@
-package com.example.airscanner
+package com.example.airscanner.activities
 
 import android.os.Bundle
 import android.os.Handler
@@ -15,6 +15,13 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
+import com.example.airscanner.models.Airport
+import com.example.airscanner.services.FlightApiService
+import com.example.airscanner.fragments.FlightDetailsFragment
+import com.example.airscanner.services.dto.FlightResponse
+import com.example.airscanner.models.LiveFlight
+import com.example.airscanner.R
+import com.example.airscanner.fragments.AirportDetailsFragment
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -26,6 +33,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportActionBar?.hide()
         setContentView(R.layout.activity_main)
 
         val fragmentContainer = findViewById<FrameLayout>(R.id.fragment_container)
