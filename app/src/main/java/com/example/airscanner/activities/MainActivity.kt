@@ -1,6 +1,8 @@
 package com.example.airscanner.activities
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Handler
 import android.widget.*
@@ -23,14 +25,20 @@ import com.example.airscanner.services.dto.FlightResponse
 import com.example.airscanner.models.LiveFlight
 import com.example.airscanner.R
 import com.example.airscanner.activities.auth.LoginActivity
-import com.example.airscanner.activities.auth.RegisterActivity
 import com.example.airscanner.fragments.AirportDetailsFragment
 import com.example.airscanner.models.TokenManager
+
+data class TrackedFlight(
+    val flight: LiveFlight,
+    var marker: Marker,
+    var lastUpdateTime: Long
+)
+
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var gMap: GoogleMap
-    private val flightMarkers = mutableListOf<Marker>()
+    private val trackedFlights = mutableMapOf<String, TrackedFlight>()
     private val airportMarkers = mutableListOf<Marker>()
     private lateinit var handler: Handler
     private lateinit var updateRunnable: Runnable
@@ -90,6 +98,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         gMap = googleMap
 
+        val europeBounds = LatLngBounds(
+            LatLng(35.0, -25.0),
+            LatLng(71.0, 45.0)
+        )
+
+        gMap.moveCamera(CameraUpdateFactory.newLatLngBounds(europeBounds, 0))
+        gMap.setLatLngBoundsForCameraTarget(europeBounds)
+
+        gMap.setMinZoomPreference(4f)
+        gMap.setMaxZoomPreference(10f)
+
         loadAirports()
 
         gMap.setOnCameraIdleListener {
@@ -109,9 +128,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
          startAutoUpdate()
+         startInterpolationLoop()
     }
 
     private fun loadAirports() {
+        val minLat = 35.0
+        val maxLat = 71.0
+        val minLon = -25.0
+        val maxLon = 45.0
+
         try {
             val inputStream: InputStream = assets.open("airport_coordinates.xlsx")
             val workbook = XSSFWorkbook(inputStream)
@@ -124,6 +149,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 val name = row.getCell(0).stringCellValue
                 val latitude = row.getCell(1).numericCellValue
                 val longitude = row.getCell(2).numericCellValue
+
+                if (latitude !in minLat..maxLat || longitude !in minLon..maxLon) continue
+
                 val airport = Airport(
                     name, latitude, longitude,
                     row.getCell(3)?.toString() ?: "",
@@ -153,8 +181,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         handler = Handler(mainLooper)
         updateRunnable = object : Runnable {
             override fun run() {
-                fetchFlights(-90.0, -180.0, 90.0, 180.0)
-                handler.postDelayed(this, 30_000)
+                fetchFlights(35.0, -25.0, 71.0, 45.0) //roughly europe
+                handler.postDelayed(this, 150_000)
             }
         }
         handler.post(updateRunnable)
@@ -203,26 +231,40 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun drawFlightsOnMap(flights: List<LiveFlight>) {
-        flightMarkers.forEach { it.remove() }
-        flightMarkers.clear()
+        trackedFlights.values.forEach { it.marker.remove() }
+        trackedFlights.clear()
 
-        flights.forEach { flight ->
-            val position = LatLng(flight.latitude, flight.longitude)
-            val rotation = ((flight.trueTrack?.toFloat() ?: 0f) - 45f + 360f) % 360f
+        val now = System.currentTimeMillis()
 
+        for (flight in flights) {
+            val pos = LatLng(flight.latitude, flight.longitude)
+            val track = (flight.trueTrack?.toFloat() ?: 0f)
+
+            val icon = getScaledMarkerIcon(R.drawable.plane_icon_yellow, 0.25f)
             val marker = gMap.addMarker(
                 MarkerOptions()
-                    .position(position)
+                    .position(pos)
                     .title(flight.callsign)
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.plane_icon))
-                    .rotation(rotation)
+                    .icon(icon)
+                    .rotation(track)
                     .anchor(0.5f, 0.5f)
                     .flat(true)
             )
-            marker?.tag = flight.callsign
-            marker?.let { flightMarkers.add(it) }
+
+            if (marker != null && flight.callsign != null) {
+                trackedFlights[flight.callsign] = TrackedFlight(flight, marker, now)
+            }
         }
     }
+
+    private fun getScaledMarkerIcon(resourceId: Int, scale: Float): BitmapDescriptor {
+        val original = BitmapFactory.decodeResource(resources, resourceId)
+        val width = (original.width * scale).toInt()
+        val height = (original.height * scale).toInt()
+        val scaled = Bitmap.createScaledBitmap(original, width, height, false)
+        return BitmapDescriptorFactory.fromBitmap(scaled)
+    }
+
 
     private fun showFragment(fragment: Fragment) {
         val fragmentContainer = findViewById<FrameLayout>(R.id.fragment_container)
@@ -237,6 +279,58 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             .addToBackStack(null)
             .commit()
     }
+
+    private fun startInterpolationLoop() {
+        val interpolateHandler = Handler(mainLooper)
+        interpolateHandler.post(object : Runnable {
+            override fun run() {
+                val now = System.currentTimeMillis()
+                for ((_, tracked) in trackedFlights) {
+                    val flight = tracked.flight
+                    val dt = (now - tracked.lastUpdateTime) / 1000.0 // in seconds
+                    val speedKnots = flight.velocity ?: continue
+                    val headingDeg = flight.trueTrack ?: continue
+
+                    val newPos = predictPosition(
+                        tracked.flight.latitude,
+                        tracked.flight.longitude,
+                        speedKnots,
+                        headingDeg,
+                        dt
+                    )
+
+                    tracked.marker.position = newPos
+                }
+
+                interpolateHandler.postDelayed(this, 1000)
+            }
+        })
+    }
+
+
+    private fun predictPosition(lat: Double, lon: Double, speedKnots: Double, headingDegrees: Double, timeSeconds: Double): LatLng {
+        val tune = 2.25
+        val earthRadius = 6371.0 // km
+        val speedKph = speedKnots * 1.852 * tune
+        val distanceKm = speedKph * (timeSeconds / 3600.0)
+
+        val headingRad = Math.toRadians(headingDegrees)
+        val latRad = Math.toRadians(lat)
+        val lonRad = Math.toRadians(lon)
+
+        val newLat = Math.asin(
+            Math.sin(latRad) * Math.cos(distanceKm / earthRadius) +
+                    Math.cos(latRad) * Math.sin(distanceKm / earthRadius) * Math.cos(headingRad)
+        )
+
+        val newLon = lonRad + Math.atan2(
+            Math.sin(headingRad) * Math.sin(distanceKm / earthRadius) * Math.cos(latRad),
+            Math.cos(distanceKm / earthRadius) - Math.sin(latRad) * Math.sin(newLat)
+        )
+
+        return LatLng(Math.toDegrees(newLat), Math.toDegrees(newLon))
+    }
+
 
     override fun onBackPressed() {
         val fragmentContainer = findViewById<FrameLayout>(R.id.fragment_container)

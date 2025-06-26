@@ -26,10 +26,6 @@
             android:theme="@style/Theme.AppCompat.Light"
 
             tools:ignore="MissingClass">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".activities.auth.RegisterActivity"
@@ -41,6 +37,11 @@
         <activity
             android:name=".activities.MainActivity"
             android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
 
         <meta-data
