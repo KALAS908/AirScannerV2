@@ -252,6 +252,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             )
 
             if (marker != null && flight.callsign != null) {
+                marker.tag = flight.callsign
                 trackedFlights[flight.callsign] = TrackedFlight(flight, marker, now)
             }
         }
